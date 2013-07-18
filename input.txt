@@ -1,0 +1,18 @@
+1 mile = 1609.344 m
+1 yard = 0.9144 m
+1 inch = 0.00254 m
+1 foot = 0.03048 m
+1 fath = 1.8288 m
+1 furlong = 201.17 m
+
+1.2 miles
+0.15 yard
+32.7 inches
+127.93 feet
+22 faths
+0.032 furlong
+1 furlong + 2.5 feet
+0.9 miles - 18 inches
+1 fath - 1 foot + 12.5 inches
+3.02 miles + 17.5 yards - 0 fath
+
