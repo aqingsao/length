@@ -12,8 +12,12 @@ public class length {
 
 	public static void main(String[] args) {
 		readFile();
-		for(int j=0;j<9;j++){
+		String teString="2.5 feet ";
+		System.out.println(getNum(teString));
+		System.out.println(toMeter(teString));
+		for(int j=0;j<10;j++){
 			result[j]=toMeter(data[j]);
+			
 			if(j>5){
 				result[j]=operate(data[j]);
 			}
@@ -40,7 +44,7 @@ public class length {
 		if(getUnit(str).equals("inches")){		return getNum(str) * todouble(myMap.get("inch"));  	} 
 		if(getUnit(str).equals("feet")){		return getNum(str) * todouble(myMap.get("foot"));  	} 
 		if(getUnit(str).equals("faths")){		return getNum(str) * todouble(myMap.get("fath"));  	} 
-		if(getUnit(str).equals("furlong")){	return getNum(str) * todouble(myMap.get("furlong"));   } 
+		if(getUnit(str).equals("furlong")){	    return getNum(str) * todouble(myMap.get("furlong"));   } 
 		return 0.0;
 	}
 	
@@ -48,12 +52,12 @@ public class length {
 		int t=0;
 		double re=0.0;
 		while(str!=null){
-			if(str.indexOf("+")!=-1){
-				re=+toMeter(str.substring(0, str.indexOf("+")-1));
-				str=str.substring(str.indexOf("+")+1);
-			}else if(str.indexOf("-")!=-1){
-				re=-toMeter(str.substring(0, str.indexOf("-")-1));
-				str=str.substring(str.indexOf("-")+1);
+			if(str.indexOf("+")!=-1 && str.length()!=2){
+				re+=toMeter(str.trim().substring(0, str.indexOf("+")-1));
+				str=str.substring(str.indexOf("+")+1)+" +";
+			}else if(str.indexOf("-")!=-1 && str.length()!=2){
+				re-=toMeter(str.substring(0, str.indexOf("-")-1));
+				str=str.substring(str.indexOf("-")+1)+" -";
 			}else{
 				str=null;
 			}
@@ -72,7 +76,6 @@ public class length {
             while ((str = in.readLine()) != null) {
                 if((temp++)<6){
                 	myMap.put(str.substring(2,str.indexOf("=")-1),str.substring(str.indexOf("=")+2,str.length()-2));
-                	
                 }else if(str.length()!=0){
                 	data[i++]=str;
 				}       	
@@ -91,11 +94,11 @@ public class length {
 		try {
             BufferedWriter out = new BufferedWriter(new FileWriter(file));
 
-            out.write("w812609862@gmail.com");
+            out.write("w812609862@gmail.com\n");
             out.newLine();
             
             for(int n=0;n<10;n++){
-            	out.write(new java.text.DecimalFormat("#.00").format(result[n]));
+            	out.write(new java.text.DecimalFormat("0.00").format(result[n])+" m\n");
             }
             out.close();
         }catch (IOException e) {
