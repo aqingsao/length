@@ -1,0 +1,292 @@
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class ConversionAndCalculationTest {
+  /**
+	 * 存放不同单位之间的换算
+	 */
+	Map<String,Double> map = new HashMap<String,Double>();
+	/**
+	 * 存放计算结果对应的字符串值,
+	 */
+	List<String> list = new ArrayList<String>();
+
+	/**
+	 * 读文件
+	 */
+	public void read(){
+		/**
+		 * 加载配置文件
+		 */
+		InputStream in = ClassLoader.getSystemResourceAsStream("input.txt");
+		/**
+		 * 从字符输入流中读取文本
+		 */
+		BufferedReader br = new BufferedReader(new InputStreamReader(in));
+	    
+		/**
+		 * 保存文本中每一行的数据
+		 */
+		String line = null;
+
+		try {
+			/**
+			 * 如果已到达流末尾，则返回 null
+			 */
+			while((line = br.readLine()) != null) {
+				/**
+				 * 根据"="匹配字符串
+				 */
+				Pattern p = Pattern.compile("=");
+				Matcher m = p.matcher(line);
+				boolean b = m.find();
+				/**
+				 *    空行       
+				 */
+				if(line.length() == 0){                                
+					continue;
+
+					/**
+					 * 不同单位之间的转换规则
+					 */
+				} else if(b == true) {  					
+					/**
+					 * 调用transformRule方法，把不同规则保存在map中，
+					 * key=单位，value=相应单位转换米的数值
+					 */
+					transformRule(line);
+
+					/**
+					 *  长度单位转化和计算工具
+					 */
+				} else {   
+					/**
+					 *  匹配"(+|-)"
+					 */
+					p = Pattern.compile("[+\\-\\*/]");
+					m = p.matcher(line);
+					b = m.find();
+
+					if(b != true) {
+						/**
+						 *  不同长度单位转换成m
+						 */
+						conversion(line);
+
+					} else {
+						/**
+						 *不同单位之间的相加减
+						 */
+						calculation(line);
+					}                                      									
+				}
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if(br != null) {
+				try {
+					/**
+					 * 关闭资源
+					 */
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	/**
+	 * 将计算结果写入文件中
+	 */
+	public void write(){
+		/**
+		 * 将文本写入字符输出流
+		 */
+		BufferedWriter bw = null;
+		try {
+			
+			/**
+			 * 获取工程的路径
+			 */
+			String path = System.getProperty("user.dir") + "/src/output.txt";
+			
+			bw = new BufferedWriter(new FileWriter(new File(path)));
+			
+			bw.write("350241280@qq.com" + "\r\n");
+			bw.newLine();
+
+			/**
+			 *   迭代计算结果集，把结果保存到文件中
+			 */
+			Iterator<String> it = list.iterator();
+			while(it.hasNext()) {
+				String s = it.next() + " m\r\n";
+				bw.write(s);
+			}
+			/**
+			 *  刷新该流的缓冲。
+			 */
+			bw.flush();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if(bw != null) {
+				try {
+					/**
+					 * 关闭资源
+					 */
+					bw.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}	
+	}
+	/**
+	 * 不同单位和标准长度米的转换规则
+	 * 取不同单位转换成m的数值，保存到map<单位，值>中
+	 * 如1 mile = 1609.344 m  map.put(mile,1609.344);
+	 */
+	private void transformRule(String line) {
+		/**
+		 * 根据"= "拆分
+		 */
+		String[] ss = line.split("= ");	
+		/**
+		 * 根据" "拆分，取单位
+		 */
+		String[] str1 = ss[0].split(" ");
+		/**
+		 * 根据" "拆分，取不同单位转换m的数值
+		 */
+		String[] str2 = ss[1].split(" ");
+		/**
+		 * 存放到map中，key=单位，value=相应单位转换成m的值
+		 */
+		map.put(str1[1], Double.parseDouble(str2[0]));     
+	}
+	/**
+	 * 单位转换
+	 */
+	private void conversion(String str) {
+		/**
+		 * 根据空格拆分
+		 */
+		String[] ss = str.split(" "); 
+		/**
+		 * 单位匹配
+		 */
+		String unit = unitMatch(ss[1]);
+		/**
+		 * 长度单位转换计算
+		 */
+		double result = Double.parseDouble(ss[0]) * map.get(unit);  
+
+		/**
+		 * 计算结果保存在list中
+		 */
+		list.add(accurate(result));
+
+	}
+	/**
+	 * 计算工具
+	 */
+	private void calculation(String line) {
+		
+		String[] ss = line.split(" ");
+		/**
+		 * 保存结果值
+		 */
+		double result = 0.0;
+		/**
+		 * 标记符号，如果是正号就是+1，如果是减号就是-1；
+		 */
+		int sign = -1;
+		/**
+		 * 保存第一个值 
+		 */
+		result = Double.parseDouble(ss[0]) * map.get(unitMatch(ss[1]));
+
+		for(int i = 3; i < ss.length; i = i + 3) {	
+			/**
+			 * 判断符号，如果是+，sign = 1，否则，sign = -1
+			 */
+			sign = ss[i - 1].equals("+") ? 1 : -1;
+
+			if(sign < 0) {
+				result -= Double.parseDouble(ss[i]) * map.get(unitMatch(ss[i + 1]));
+			} else {
+				result += Double.parseDouble(ss[i]) * map.get(unitMatch(ss[i + 1]));
+			}		
+		}
+		/**
+		 * 计算结果保存在list中
+		 */
+		list.add(accurate(result));
+	}
+	/**
+	 * 单位匹配
+	 * @param str
+	 * @return
+	 */
+	private String unitMatch(String str) {
+
+		if(str.equals("miles")) {
+			return "mile";
+
+		} else if(str.equals("yards")) {
+			return "yard";
+
+		} else if(str.equals("inches")) {
+			return "inch";
+
+		} else if(str.equals("feet")) {
+			return "foot";
+
+		} else if(str.equals("faths")) {
+			return "fath";
+
+		} else {
+			return str;
+		}
+	}
+	/**
+	 * 小数点精确到后两位
+	 * @param d
+	 * @return
+	 */
+	private String accurate(double d) {
+		/**
+		 * 转换格式
+		 */
+		String str = String.format("%.2f", d);
+
+		return str;
+	}
+	/**
+	 * 主函数，用来进行测试
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		ConversionAndCalculationTest cac = new ConversionAndCalculationTest();
+		cac.read();
+		cac.write();
+	}
+}
