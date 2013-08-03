@@ -1,4 +1,5 @@
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -8,16 +9,52 @@ using namespace std;
 
 typedef map<string, double> Str2Dbl;
 
+
+string GetPluralForm(const string& strSingluar);
+void   AddRadixConversionRule(const string& strLine, Str2Dbl& radix2Val);
+double ParseFormular(const string& strFormular, Str2Dbl& radix2Val);
+
+int main()
+{
+	fstream inf("input.txt", ios::in);
+	if (!inf) return -1;
+	// read in rules and store 
+	string strLine;
+	Str2Dbl radix2Val;
+	while (getline(inf, strLine))
+	{
+		if (!strLine.empty())
+			AddRadixConversionRule(strLine, radix2Val);
+		else
+			break;
+	}
+	
+	fstream outf("output.txt", ios::out);
+	if (!outf) return -1;
+	// header lines
+	outf << "squalfof@gmail.com\n";
+	outf << "\n";
+	// read in formular and calc
+	while (getline(inf, strLine))
+	{
+		double dResult = ParseFormular(strLine, radix2Val);
+		outf << setiosflags(ios::fixed) << setprecision(2) << dResult << " m\n";
+	}
+
+	outf.close();
+	inf.close();
+
+	return 0;
+}
+
+
 string GetPluralForm(const string& strSingluar)
 {
-	// special treatment for FOOT
+	// special treatment for FOOT/INCH
 	if (strSingluar == "foot")
 		return "feet";
-
-	size_t pos = strSingluar.find("ch");
-	if ((pos != string::npos) &&
-		(pos == strSingluar.length() - 2))
-		return (strSingluar + "es");
+	else if (strSingluar == "inch")
+		return "inches";
 	else
 		return (strSingluar + "s");
 }
@@ -59,37 +96,4 @@ double ParseFormular(const string& strFormular, Str2Dbl& radix2Val)
 	} while (!strOp.empty());
 
 	return dResult;
-}
-
-int main()
-{
-	fstream inf("input.txt", ios::in);
-	if (!inf) return -1;
-	// read in rules and store 
-	string strLine;
-	Str2Dbl radix2Val;
-	while (getline(inf, strLine))
-	{
-		if (!strLine.empty())
-			AddRadixConversionRule(strLine, radix2Val);
-		else
-			break;
-	}
-	
-	fstream outf("output.txt", ios::out);
-	if (!outf) return -1;
-	// header lines
-	outf << "squalfof@gmail.com\n";
-	outf << "\n";
-	// read in formular and calc
-	while (getline(inf, strLine))
-	{
-		double dResult = ParseFormular(strLine, radix2Val);
-		outf << dResult << " m\n";
-	}
-
-	outf.close();
-	inf.close();
-
-	return 0;
 }
