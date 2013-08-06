@@ -1,16 +1,19 @@
+
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <map>
 #include <sstream>
 #include <string>
+#include <vector>
 
 using namespace std;
 
 typedef map<string, double> Str2Dbl;
+typedef vector<string> StrVec;
 
 
-string GetPluralForm(const string& strSingluar);
+void   GetPluralForm(const string& strSingluar, StrVec& strVec);
 void   AddRadixConversionRule(const string& strLine, Str2Dbl& radix2Val);
 double ParseFormular(const string& strFormular, Str2Dbl& radix2Val);
 
@@ -48,15 +51,21 @@ int main()
 }
 
 
-string GetPluralForm(const string& strSingluar)
+void GetPluralForm(const string& strSingluar, StrVec& strVec)
 {
-	// special treatment for FOOT/INCH
+	strVec.clear();
+	// special treatment for FOOT/INCH/MICRON
 	if (strSingluar == "foot")
-		return "feet";
+		strVec.push_back("feet");
 	else if (strSingluar == "inch")
-		return "inches";
+		strVec.push_back("inches");
+	else if (strSingluar == "micron")
+	{
+		strVec.push_back("microns");
+		strVec.push_back("micra");
+	}
 	else
-		return (strSingluar + "s");
+		strVec.push_back(strSingluar + "s");
 }
 
 void AddRadixConversionRule(const string& strLine, Str2Dbl& radix2Val)
@@ -70,8 +79,10 @@ void AddRadixConversionRule(const string& strLine, Str2Dbl& radix2Val)
 	// singluar form val
 	radix2Val[strLRadix] = dRVal;
 	// also set its plural formal val
-	string strPlural = GetPluralForm(strLRadix);
-	radix2Val[strPlural] = dRVal;
+	StrVec vstrPlurals;
+	GetPluralForm(strLRadix, vstrPlurals);
+	for (int i = 0; i < vstrPlurals.size(); i++)
+		radix2Val[ vstrPlurals[i] ] = dRVal;
 }
 
 double ParseFormular(const string& strFormular, Str2Dbl& radix2Val)
